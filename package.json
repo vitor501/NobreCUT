@@ -2,10 +2,14 @@
   "name": "@figma/my-make-file",
   "private": true,
   "version": "0.0.1",
+  "packageManager": "pnpm@10.5.2",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build"
+  },
+  "overrides": {
+    "vite": "6.3.5"
   },
   "dependencies": {
     "@emotion/react": "11.14.0",
@@ -81,11 +85,6 @@
     },
     "react-dom": {
       "optional": true
-    }
-  },
-  "pnpm": {
-    "overrides": {
-      "vite": "6.3.5"
     }
   },
   "allowScripts": {
