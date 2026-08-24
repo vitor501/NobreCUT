@@ -1,0 +1,18 @@
+@import 'tailwindcss' source(none);
+@source '../**/*.{js,ts,jsx,tsx}';
+@import 'tw-animate-css';
+
+@theme {
+  --color-brand-gold: #c9a84c;
+  --color-bg-dark: #0a0a0a;
+  --color-card-dark: #141414;
+  --color-text-primary: #f0ece4;
+  --color-text-secondary: #8a8278;
+  --color-border-gold: rgba(201, 168, 76, 0.15);
+  --color-border-gold-light: rgba(201, 168, 76, 0.1);
+  --color-border-gold-strong: rgba(201, 168, 76, 0.3);
+  
+  --font-inter: 'Inter', sans-serif;
+  --font-playfair: 'Playfair Display', serif;
+  --font-mono: 'DM Mono', monospace;
+}
