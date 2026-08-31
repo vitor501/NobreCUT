@@ -201,6 +201,13 @@ export function ServicesScreen({ user, subscribedPlan, onBook, onLogout, onLogin
     }
   };
 
+  const parsePrice = (priceStr: string) => {
+    if (!priceStr) return 0;
+    // Remove "R$", spaces, convert "89,90" to "89.90"
+    const cleaned = priceStr.replace(/[^\d.,]/g, "").replace(",", ".");
+    return parseFloat(cleaned) || 0;
+  };
+
   const addToCart = (product: { name: string; price: string; photo: string }) => {
     setCart((prev) => {
       const existing = prev.find((p) => p.name === product.name);
@@ -218,7 +225,7 @@ export function ServicesScreen({ user, subscribedPlan, onBook, onLogout, onLogin
   };
 
   const handleFinalizePurchase = () => {
-    const subtotal = cart.reduce((acc, item) => acc + (parseFloat(item.price.replace("R$ ", "").replace(",", ".")) * item.qty), 0);
+    const subtotal = cart.reduce((acc, item) => acc + (parsePrice(item.price) * item.qty), 0);
     const discountValue = subtotal * discount;
     const finalTotal = subtotal - discountValue;
     const itemsCount = cart.reduce((acc, p) => acc + p.qty, 0);
@@ -676,7 +683,7 @@ export function ServicesScreen({ user, subscribedPlan, onBook, onLogout, onLogin
                 ) : (
                   <div className="flex flex-col gap-5">
                     {cart.map((item) => {
-                      const itemTotal = parseFloat(item.price.replace("R$ ", "").replace(",", ".")) * item.qty;
+                      const itemTotal = parsePrice(item.price) * item.qty;
                       return (
                         <div key={item.name} className="flex justify-between items-start pb-4 border-b" style={{ borderColor: "rgba(201,168,76,0.08)" }}>
                           <div className="flex-1 pr-4">
@@ -718,7 +725,7 @@ export function ServicesScreen({ user, subscribedPlan, onBook, onLogout, onLogin
                   </div>
 
                   {(() => {
-                    const subtotal = cart.reduce((acc, item) => acc + (parseFloat(item.price.replace("R$ ", "").replace(",", ".")) * item.qty), 0);
+                    const subtotal = cart.reduce((acc, item) => acc + (parsePrice(item.price) * item.qty), 0);
                     const discountValue = subtotal * discount;
                     const finalTotal = subtotal - discountValue;
                     
