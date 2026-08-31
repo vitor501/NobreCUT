@@ -127,14 +127,14 @@ export function BookingScreen({ user, barber, onBack, onLogout, onConfirm }: Pro
     <div className="min-h-screen bg-[var(--color-bg-dark)] font-inter">
       {/* Nav */}
       <nav className="flex items-center justify-between px-8 py-5 border-b border-[var(--color-border-gold)]">
-        <div className="flex items-center gap-3">
+        <button onClick={onBack} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
           <div className="w-8 h-8 flex items-center justify-center rounded-sm bg-[var(--color-brand-gold)]">
             <Scissors size={14} className="text-[var(--color-bg-dark)]" />
           </div>
           <span className="text-lg tracking-[0.2em] uppercase font-playfair text-[var(--color-text-primary)]">
             Nobre Cut
           </span>
-        </div>
+        </button>
         <button onClick={onLogout} className="text-sm transition-colors hover:opacity-70 text-[var(--color-text-secondary)]">
           Sair
         </button>

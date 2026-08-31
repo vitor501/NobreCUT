@@ -241,14 +241,18 @@ export function ServicesScreen({ user, subscribedPlan, onBook, onLogout, onLogin
         style={{ width: 240, backgroundColor: "#0e0e0e", borderRight: "1px solid rgba(201,168,76,0.12)", flexShrink: 0 }}
       >
         {/* Logo */}
-        <div className="flex items-center gap-3 px-6 py-6 border-b" style={{ borderColor: "rgba(201,168,76,0.12)" }}>
+        <button
+          onClick={() => { setActiveNav("barbeiros"); setSidebarOpen(false); }}
+          className="flex items-center gap-3 px-6 py-6 border-b text-left hover:opacity-80 transition-opacity w-full"
+          style={{ borderColor: "rgba(201,168,76,0.12)" }}
+        >
           <div className="w-8 h-8 flex items-center justify-center rounded-sm" style={{ backgroundColor: GOLD }}>
             <Scissors size={14} color="#0a0a0a" />
           </div>
           <span className="tracking-widest uppercase" style={{ fontFamily: "'Playfair Display', serif", color: "#f0ece4", fontSize: "0.95rem", letterSpacing: "0.18em" }}>
             Nobre Cut
           </span>
-        </div>
+        </button>
 
         {/* Nav */}
         <nav className="flex flex-col gap-1 px-3 py-5 flex-1">

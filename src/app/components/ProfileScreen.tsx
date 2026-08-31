@@ -109,14 +109,14 @@ export function ProfileScreen({ user, appointments, onBack, onLogout }: Props) {
 
       {/* Nav */}
       <nav className="flex items-center justify-between px-8 py-5 border-b" style={{ borderColor: "rgba(201,168,76,0.15)" }}>
-        <div className="flex items-center gap-3">
+        <button onClick={onBack} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
           <div className="w-8 h-8 flex items-center justify-center rounded-sm" style={{ backgroundColor: GOLD }}>
             <Scissors size={14} color="#0a0a0a" />
           </div>
           <span className="text-lg tracking-widest uppercase" style={{ fontFamily: "'Playfair Display', serif", color: "#f0ece4", letterSpacing: "0.2em" }}>
             Nobre Cut
           </span>
-        </div>
+        </button>
         <button onClick={onLogout} className="flex items-center gap-2 text-sm hover:opacity-70 transition-opacity" style={{ color: "#8a8278" }}>
           <LogOut size={14} />
           Sair
