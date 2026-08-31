@@ -647,12 +647,12 @@ export function ServicesScreen({ user, subscribedPlan, onBook, onLogout, onLogin
       {/* Cart Modal */}
       <AnimatePresence>
         {cartOpen && (
-          <>
+          <div className="fixed inset-0 z-50 overflow-hidden">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50"
+              className="absolute inset-0"
               style={{ backgroundColor: "rgba(0,0,0,0.6)" }}
               onClick={() => setCartOpen(false)}
             />
@@ -661,7 +661,7 @@ export function ServicesScreen({ user, subscribedPlan, onBook, onLogout, onLogin
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "tween", duration: 0.3 }}
-              className="fixed right-0 top-0 bottom-0 z-50 w-full max-w-sm flex flex-col shadow-2xl"
+              className="absolute right-0 top-0 bottom-0 z-10 w-full max-w-sm flex flex-col shadow-2xl"
               style={{ backgroundColor: "#0e0e0e", borderLeft: "1px solid rgba(201,168,76,0.15)" }}
             >
               <div className="flex items-center justify-between p-6 border-b" style={{ borderColor: "rgba(201,168,76,0.12)" }}>
@@ -759,7 +759,7 @@ export function ServicesScreen({ user, subscribedPlan, onBook, onLogout, onLogin
                 </div>
               )}
             </motion.div>
-          </>
+          </div>
         )}
       </AnimatePresence>
 
