@@ -19,7 +19,9 @@ interface User {
 export default function App() {
   const { session, userProfile, loading } = useSession();
   
-  const [screen, setScreen] = useState<Screen>("auth");
+  const [screen, setScreen] = useState<Screen>("services");
+  const [authRole, setAuthRole] = useState<UserRole>("client");
+  const [allowRoleSwitch, setAllowRoleSwitch] = useState<boolean>(false);
   const [selectedBarber, setSelectedBarber] = useState<Barber | null>(null);
   
   // Data from Supabase
@@ -27,20 +29,42 @@ export default function App() {
   const [subscribedPlan, setSubscribedPlan] = useState<string | null>(null);
   const [subscriberCount, setSubscriberCount] = useState(0);
 
-  // Sync screen with auth state
+  // Sync screen with auth state when logging in/out
   useEffect(() => {
     if (!loading) {
       if (session && userProfile) {
-        setScreen(userProfile.role === "admin" ? "admin" : "services");
-        fetchUserData(session.user.id);
         if (userProfile.role === "admin") {
+          setScreen("admin");
           fetchAdminData();
+        } else {
+          // If logged in as client and was on auth or admin, go to services or continue booking
+          if (screen === "auth" || screen === "admin") {
+            setScreen(selectedBarber ? "booking" : "services");
+          }
         }
+        fetchUserData(session.user.id);
       } else {
-        setScreen("auth");
+        // When logged out, reset to services home screen
+        if (screen === "admin" || screen === "profile") {
+          setScreen("services");
+        }
       }
     }
   }, [session, userProfile, loading]);
+
+  // Listener for secret Admin access via 'Tab' key press on home page
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Tab" && !session) {
+        // Toggle/Trigger admin login mode
+        setAuthRole("admin");
+        setAllowRoleSwitch(true);
+        setScreen("auth");
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [session]);
 
   const fetchUserData = async (userId: string) => {
     // Fetch subscriptions
@@ -86,44 +110,60 @@ export default function App() {
 
   const handleBook = (barber: Barber) => {
     setSelectedBarber(barber);
-    setScreen("booking");
+    if (!session) {
+      // Require login before proceeding to booking
+      setAuthRole("client");
+      setAllowRoleSwitch(false);
+      setScreen("auth");
+    } else {
+      setScreen("booking");
+    }
   };
 
   const handleConfirm = async (appointment: Appointment) => {
     setAppointments((prev) => [...prev, appointment]);
-    // It's also inserted in BookingScreen directly now, but keeping local state updated
   };
 
   const handleSubscribe = (planId: string) => {
+    if (!session) {
+      setAuthRole("client");
+      setAllowRoleSwitch(false);
+      setScreen("auth");
+      return;
+    }
     setSubscribedPlan(planId);
   };
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    // state is cleared by useSession reactivity
+    setScreen("services");
+  };
+
+  const openClientLogin = () => {
+    setAuthRole("client");
+    setAllowRoleSwitch(false);
+    setScreen("auth");
   };
 
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a] text-[#c9a84c]">Carregando...</div>;
   }
 
-  if (screen === "auth") return <AuthScreen />;
-
-  if (screen === "admin") return <AdminScreen subscriberCount={subscriberCount} onLogout={handleLogout} />;
-
-  if (screen === "services" && userProfile)
+  if (screen === "auth") {
     return (
-      <ServicesScreen
-        user={userProfile}
-        subscribedPlan={subscribedPlan}
-        onBook={handleBook}
-        onLogout={handleLogout}
-        onProfile={() => setScreen("profile")}
-        onPlans={() => setScreen("plans")}
+      <AuthScreen
+        initialRole={authRole}
+        allowRoleSwitch={allowRoleSwitch}
+        onCancel={() => setScreen("services")}
       />
     );
+  }
 
-  if (screen === "booking" && userProfile && selectedBarber)
+  if (screen === "admin" && userProfile?.role === "admin") {
+    return <AdminScreen subscriberCount={subscriberCount} onLogout={handleLogout} />;
+  }
+
+  if (screen === "booking" && userProfile && selectedBarber) {
     return (
       <BookingScreen
         user={userProfile}
@@ -133,8 +173,9 @@ export default function App() {
         onConfirm={handleConfirm}
       />
     );
+  }
 
-  if (screen === "profile" && userProfile)
+  if (screen === "profile" && userProfile) {
     return (
       <ProfileScreen
         user={userProfile}
@@ -143,17 +184,30 @@ export default function App() {
         onLogout={handleLogout}
       />
     );
+  }
 
-  if (screen === "plans" && userProfile)
+  if (screen === "plans") {
     return (
       <PlansScreen
-        user={userProfile}
+        user={userProfile || { name: "Visitante", email: "" }}
         subscribedPlan={subscribedPlan}
         onSubscribe={handleSubscribe}
         onBack={() => setScreen("services")}
         onLogout={handleLogout}
       />
     );
+  }
 
-  return null;
+  // Default / Home screen: ServicesScreen for everyone (guests and logged-in users)
+  return (
+    <ServicesScreen
+      user={userProfile}
+      subscribedPlan={subscribedPlan}
+      onBook={handleBook}
+      onLogout={handleLogout}
+      onLogin={openClientLogin}
+      onProfile={() => setScreen("profile")}
+      onPlans={() => setScreen("plans")}
+    />
+  );
 }

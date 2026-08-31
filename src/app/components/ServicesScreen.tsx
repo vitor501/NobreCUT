@@ -171,15 +171,16 @@ const PRODUCTS = [
 type NavItem = "barbeiros" | "servicos" | "produtos";
 
 interface Props {
-  user: { name: string; email: string };
+  user?: { name: string; email: string } | null;
   subscribedPlan?: string | null;
   onBook: (barber: Barber) => void;
   onLogout: () => void;
+  onLogin: () => void;
   onProfile: () => void;
   onPlans: () => void;
 }
 
-export function ServicesScreen({ user, subscribedPlan, onBook, onLogout, onProfile, onPlans }: Props) {
+export function ServicesScreen({ user, subscribedPlan, onBook, onLogout, onLogin, onProfile, onPlans }: Props) {
   const [activeNav, setActiveNav] = useState<NavItem>("barbeiros");
   const [expandedBarber, setExpandedBarber] = useState<number | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -282,30 +283,42 @@ export function ServicesScreen({ user, subscribedPlan, onBook, onLogout, onProfi
               <Crown size={16} />
               {isSubscriber ? "Meu Plano" : "Planos"}
             </button>
-            <button
-              onClick={onProfile}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-sm text-sm w-full text-left transition-all hover:opacity-80"
-              style={{ color: "#8a8278" }}
-            >
-              <User size={16} />
-              Perfil
-            </button>
+            {user && (
+              <button
+                onClick={onProfile}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-sm text-sm w-full text-left transition-all hover:opacity-80"
+                style={{ color: "#8a8278" }}
+              >
+                <User size={16} />
+                Perfil
+              </button>
+            )}
           </div>
         </nav>
 
-        {/* User + logout */}
+        {/* User + logout / login */}
         <div className="px-4 py-4 border-t" style={{ borderColor: "rgba(201,168,76,0.12)" }}>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 min-w-0">
-              <div className="w-7 h-7 rounded-sm flex items-center justify-center flex-shrink-0" style={{ backgroundColor: "rgba(201,168,76,0.15)" }}>
-                <User size={13} style={{ color: GOLD }} />
+          {user ? (
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="w-7 h-7 rounded-sm flex items-center justify-center flex-shrink-0" style={{ backgroundColor: "rgba(201,168,76,0.15)" }}>
+                  <User size={13} style={{ color: GOLD }} />
+                </div>
+                <span className="text-xs truncate" style={{ color: "#8a8278" }}>{user.name}</span>
               </div>
-              <span className="text-xs truncate" style={{ color: "#8a8278" }}>{user.name}</span>
+              <button onClick={onLogout} title="Sair" className="hover:opacity-70 transition-opacity ml-2" style={{ color: "#5a5248" }}>
+                <LogOut size={14} />
+              </button>
             </div>
-            <button onClick={onLogout} className="hover:opacity-70 transition-opacity ml-2" style={{ color: "#5a5248" }}>
-              <LogOut size={14} />
+          ) : (
+            <button
+              onClick={onLogin}
+              className="w-full flex items-center justify-center gap-2 py-2 text-xs uppercase tracking-widest rounded-sm transition-all hover:opacity-90"
+              style={{ backgroundColor: "rgba(201,168,76,0.15)", color: GOLD, border: "1px solid rgba(201,168,76,0.3)", fontFamily: "'DM Mono', monospace" }}
+            >
+              <User size={13} /> Entrar
             </button>
-          </div>
+          )}
         </div>
       </aside>
 
@@ -320,7 +333,7 @@ export function ServicesScreen({ user, subscribedPlan, onBook, onLogout, onProfi
           <span style={{ fontFamily: "'Playfair Display', serif", color: "#f0ece4" }}>
             {navItems.find((n) => n.id === activeNav)?.label}
           </span>
-          <button onClick={onProfile} style={{ color: "#8a8278" }}>
+          <button onClick={user ? onProfile : onLogin} style={{ color: "#8a8278" }}>
             <User size={18} />
           </button>
         </div>

@@ -5,7 +5,10 @@ import { Eye, EyeOff, Scissors, Phone, Mail, User, ShieldCheck } from "lucide-re
 export type UserRole = "client" | "admin";
 
 interface AuthScreenProps {
-  onLogin?: (user: { name: string; email: string; role: UserRole }) => void; // Optional now
+  onLogin?: (user: { name: string; email: string; role: UserRole }) => void;
+  initialRole?: UserRole;
+  allowRoleSwitch?: boolean;
+  onCancel?: () => void;
 }
 
 type LoginMethod = "email" | "phone";
@@ -26,8 +29,8 @@ const handleBlur = (e: React.FocusEvent<HTMLInputElement>) =>
 
 import { supabase } from "../../lib/supabase";
 
-export function AuthScreen({ onLogin }: AuthScreenProps = {}) {
-  const [role, setRole] = useState<UserRole>("client");
+export function AuthScreen({ onLogin, initialRole = "client", allowRoleSwitch = true, onCancel }: AuthScreenProps = {}) {
+  const [role, setRole] = useState<UserRole>(initialRole);
   const [mode, setMode] = useState<"login" | "register">("login");
   const [loginMethod, setLoginMethod] = useState<LoginMethod>("email");
   const [showPassword, setShowPassword] = useState(false);
@@ -128,21 +131,35 @@ export function AuthScreen({ onLogin }: AuthScreenProps = {}) {
       <div className="flex flex-col justify-center w-full lg:w-1/2 px-8 sm:px-16" style={{ backgroundColor: "#0a0a0a" }}>
         <div className="max-w-md w-full mx-auto">
 
-          {/* Logo */}
-          <div className="flex items-center gap-3 mb-10">
-            <div className="w-10 h-10 flex items-center justify-center rounded-sm" style={{ backgroundColor: "#c9a84c" }}>
-              <Scissors size={18} color="#0a0a0a" />
+          {/* Header & Logo */}
+          <div className="flex items-center justify-between mb-10">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 flex items-center justify-center rounded-sm" style={{ backgroundColor: "#c9a84c" }}>
+                <Scissors size={18} color="#0a0a0a" />
+              </div>
+              <span className="text-xl tracking-widest uppercase" style={{ fontFamily: "'Playfair Display', serif", color: "#f0ece4", letterSpacing: "0.2em" }}>
+                Nobre Cut
+              </span>
             </div>
-            <span className="text-xl tracking-widest uppercase" style={{ fontFamily: "'Playfair Display', serif", color: "#f0ece4", letterSpacing: "0.2em" }}>
-              Nobre Cut
-            </span>
+            {onCancel && (
+              <button
+                type="button"
+                onClick={onCancel}
+                className="text-xs uppercase tracking-widest px-3 py-1.5 rounded-sm transition-all hover:opacity-80"
+                style={{ color: "#8a8278", border: "1px solid rgba(201,168,76,0.2)", fontFamily: "'DM Mono', monospace" }}
+              >
+                ← Voltar
+              </button>
+            )}
           </div>
 
-          {/* Role selector */}
-          <div className="flex rounded-sm overflow-hidden mb-8" style={{ border: "1px solid rgba(201,168,76,0.2)" }}>
-            <RoleTab active={role === "client"} icon={<User size={14} />} label="Cliente" onClick={() => switchRole("client")} />
-            <RoleTab active={role === "admin"} icon={<ShieldCheck size={14} />} label="Administrador" onClick={() => switchRole("admin")} gold />
-          </div>
+          {/* Role selector (if allowed) */}
+          {allowRoleSwitch && (
+            <div className="flex rounded-sm overflow-hidden mb-8" style={{ border: "1px solid rgba(201,168,76,0.2)" }}>
+              <RoleTab active={role === "client"} icon={<User size={14} />} label="Cliente" onClick={() => switchRole("client")} />
+              <RoleTab active={role === "admin"} icon={<ShieldCheck size={14} />} label="Administrador" onClick={() => switchRole("admin")} gold />
+            </div>
+          )}
 
           {/* Admin hint */}
           <AnimatePresence>
