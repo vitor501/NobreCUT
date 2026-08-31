@@ -187,7 +187,8 @@ export function ServicesScreen({ user, subscribedPlan, onBook, onLogout, onLogin
   const [cart, setCart] = useState<{name: string, price: string, qty: number}[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
   const [coupon, setCoupon] = useState("");
-  const [discount, setDiscount] = useState(0);
+  const [addedProductToast, setAddedProductToast] = useState<{ name: string; photo: string; price: string } | null>(null);
+  const [checkoutSuccessModal, setCheckoutSuccessModal] = useState<{ total: string; itemsCount: number } | null>(null);
 
   const applyCoupon = () => {
     if (coupon.toUpperCase() === "NOBRE10") {
@@ -200,7 +201,7 @@ export function ServicesScreen({ user, subscribedPlan, onBook, onLogout, onLogin
     }
   };
 
-  const addToCart = (product: { name: string; price: string }) => {
+  const addToCart = (product: { name: string; price: string; photo: string }) => {
     setCart((prev) => {
       const existing = prev.find((p) => p.name === product.name);
       if (existing) {
@@ -210,6 +211,26 @@ export function ServicesScreen({ user, subscribedPlan, onBook, onLogout, onLogin
       }
       return [...prev, { name: product.name, price: product.price, qty: 1 }];
     });
+    setAddedProductToast({ name: product.name, photo: product.photo, price: product.price });
+    setTimeout(() => {
+      setAddedProductToast(null);
+    }, 3500);
+  };
+
+  const handleFinalizePurchase = () => {
+    const subtotal = cart.reduce((acc, item) => acc + (parseFloat(item.price.replace("R$ ", "").replace(",", ".")) * item.qty), 0);
+    const discountValue = subtotal * discount;
+    const finalTotal = subtotal - discountValue;
+    const itemsCount = cart.reduce((acc, p) => acc + p.qty, 0);
+
+    setCartOpen(false);
+    setCheckoutSuccessModal({
+      total: `R$ ${finalTotal.toFixed(2).replace(".", ",")}`,
+      itemsCount,
+    });
+    setCart([]);
+    setCoupon("");
+    setDiscount(0);
   };
 
   const isSubscriber = !!subscribedPlan;
@@ -722,13 +743,7 @@ export function ServicesScreen({ user, subscribedPlan, onBook, onLogout, onLogin
                   })()}
                   
                   <button
-                    onClick={() => {
-                      alert("Pedido finalizado com sucesso!");
-                      setCart([]);
-                      setCoupon("");
-                      setDiscount(0);
-                      setCartOpen(false);
-                    }}
+                    onClick={handleFinalizePurchase}
                     className="w-full py-3.5 text-xs uppercase tracking-widest transition-all rounded-sm hover:opacity-90 flex items-center justify-center gap-2"
                     style={{ backgroundColor: GOLD, color: "#0a0a0a", fontFamily: "'DM Mono', monospace", fontWeight: "bold" }}
                   >
@@ -736,6 +751,89 @@ export function ServicesScreen({ user, subscribedPlan, onBook, onLogout, onLogin
                   </button>
                 </div>
               )}
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Pop-up / Toast: Produto Adicionado ao Carrinho */}
+      <AnimatePresence>
+        {addedProductToast && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            className="fixed bottom-6 right-6 z-50 flex items-center gap-4 p-4 rounded-sm shadow-2xl"
+            style={{
+              backgroundColor: "#141414",
+              border: "1px solid rgba(201,168,76,0.4)",
+              backdropFilter: "blur(8px)",
+              maxWidth: "360px",
+            }}
+          >
+            <div className="w-12 h-12 rounded-sm overflow-hidden flex-shrink-0 bg-zinc-900 border" style={{ borderColor: "rgba(201,168,76,0.2)" }}>
+              <img src={addedProductToast.photo} alt={addedProductToast.name} className="w-full h-full object-cover" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-1.5 mb-1">
+                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: "#10b981" }} />
+                <p className="text-[11px] uppercase tracking-wider font-semibold" style={{ color: GOLD, fontFamily: "'DM Mono', monospace" }}>
+                  Adicionado ao Carrinho!
+                </p>
+              </div>
+              <p className="text-xs truncate font-medium" style={{ color: "#f0ece4" }}>{addedProductToast.name}</p>
+              <p className="text-xs font-mono" style={{ color: "#8a8278" }}>{addedProductToast.price}</p>
+            </div>
+            <button
+              onClick={() => setCartOpen(true)}
+              className="text-xs px-2.5 py-1.5 rounded-sm uppercase tracking-wider font-mono hover:opacity-80 transition-opacity"
+              style={{ backgroundColor: GOLD, color: "#0a0a0a" }}
+            >
+              Ver
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Modal / Pop-up: Compra Finalizada com Sucesso */}
+      <AnimatePresence>
+        {checkoutSuccessModal && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50"
+              style={{ backgroundColor: "rgba(0,0,0,0.8)", backdropFilter: "blur(4px)" }}
+              onClick={() => setCheckoutSuccessModal(null)}
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="fixed inset-0 m-auto z-50 max-w-md h-fit p-8 rounded-sm text-center shadow-2xl flex flex-col items-center"
+              style={{ backgroundColor: "#121212", border: "1px solid rgba(201,168,76,0.3)" }}
+            >
+              <div className="w-16 h-16 rounded-full flex items-center justify-center mb-5" style={{ backgroundColor: GOLD }}>
+                <ShoppingBag size={28} color="#0a0a0a" />
+              </div>
+              <h2 className="text-2xl mb-2" style={{ fontFamily: "'Playfair Display', serif", color: "#f0ece4" }}>
+                Pedido Confirmado!
+              </h2>
+              <p className="text-sm leading-relaxed mb-6" style={{ color: "#8a8278" }}>
+                Sua compra de <strong style={{ color: "#f0ece4" }}>{checkoutSuccessModal.itemsCount} {checkoutSuccessModal.itemsCount === 1 ? "item" : "itens"}</strong> foi realizada com sucesso no valor total de{" "}
+                <strong style={{ color: GOLD, fontFamily: "'DM Mono', monospace" }}>{checkoutSuccessModal.total}</strong>.
+              </p>
+              <p className="text-xs mb-8 p-3 rounded-sm w-full" style={{ backgroundColor: "rgba(201,168,76,0.06)", border: "1px solid rgba(201,168,76,0.15)", color: "#c0b8ac" }}>
+                Você receberá um e-mail de confirmação com os detalhes da entrega.
+              </p>
+              <button
+                onClick={() => setCheckoutSuccessModal(null)}
+                className="w-full py-3.5 text-xs uppercase tracking-widest rounded-sm transition-all hover:opacity-90 font-mono font-bold"
+                style={{ backgroundColor: GOLD, color: "#0a0a0a" }}
+              >
+                Concluir
+              </button>
             </motion.div>
           </>
         )}
