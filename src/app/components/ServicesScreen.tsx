@@ -187,6 +187,7 @@ export function ServicesScreen({ user, subscribedPlan, onBook, onLogout, onLogin
   const [cart, setCart] = useState<{name: string, price: string, qty: number}[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
   const [coupon, setCoupon] = useState("");
+  const [discount, setDiscount] = useState(0);
   const [addedProductToast, setAddedProductToast] = useState<{ name: string; photo: string; price: string } | null>(null);
   const [checkoutSuccessModal, setCheckoutSuccessModal] = useState<{ total: string; itemsCount: number } | null>(null);
 
@@ -805,21 +806,22 @@ export function ServicesScreen({ user, subscribedPlan, onBook, onLogout, onLogin
       {/* Modal / Pop-up: Compra Finalizada com Sucesso */}
       <AnimatePresence>
         {checkoutSuccessModal && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50"
-              style={{ backgroundColor: "rgba(0,0,0,0.8)", backdropFilter: "blur(4px)" }}
-              onClick={() => setCheckoutSuccessModal(null)}
-            />
+          <motion.div
+            key="checkout-overlay"
+            className="fixed inset-0 z-50 flex items-center justify-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{ backgroundColor: "rgba(0,0,0,0.8)", backdropFilter: "blur(4px)" }}
+            onClick={() => setCheckoutSuccessModal(null)}
+          >
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="fixed inset-0 m-auto z-50 max-w-md h-fit p-8 rounded-sm text-center shadow-2xl flex flex-col items-center"
+              className="relative z-10 w-full max-w-md mx-4 p-8 rounded-sm text-center shadow-2xl flex flex-col items-center"
               style={{ backgroundColor: "#121212", border: "1px solid rgba(201,168,76,0.3)" }}
+              onClick={(e) => e.stopPropagation()}
             >
               <div className="w-16 h-16 rounded-full flex items-center justify-center mb-5" style={{ backgroundColor: GOLD }}>
                 <ShoppingBag size={28} color="#0a0a0a" />
@@ -842,7 +844,7 @@ export function ServicesScreen({ user, subscribedPlan, onBook, onLogout, onLogin
                 Concluir
               </button>
             </motion.div>
-          </>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>
