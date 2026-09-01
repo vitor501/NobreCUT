@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   Scissors, Star, Clock, ChevronRight, Calendar, LogOut,
-  User, Crown, Users, Wrench, ShoppingBag, Lock, Menu, X,
+  User, Crown, Users, Wrench, ShoppingBag, Lock, Menu, X, Info,
 } from "lucide-react";
 
 export interface Barber {
@@ -373,6 +373,14 @@ export function ServicesScreen({ user, subscribedPlan, onBook, onLogout, onLogin
 
         {/* Content */}
         <main className="flex-1 overflow-y-auto px-6 lg:px-10 py-8">
+
+          {/* Banner de Aviso — Projeto Fictício Acadêmico */}
+          <div className="mb-6 px-4 py-3 rounded-sm flex items-center gap-3 text-xs border shadow-sm" style={{ backgroundColor: "#ffffff", color: "#0a0a0a", borderColor: "#c9a84c" }}>
+            <Info size={18} className="flex-shrink-0 text-[#c9a84c]" />
+            <p className="leading-relaxed">
+              <strong>Aviso:</strong> Este é um site fictício desenvolvido estritamente para um trabalho acadêmico de faculdade, sem fins lucrativos.
+            </p>
+          </div>
 
           {/* ── BARBEIROS ── */}
           {activeNav === "barbeiros" && (
